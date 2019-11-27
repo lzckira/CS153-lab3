@@ -12,7 +12,7 @@
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
-uint ticks;
+uint ticks, StackEnd;   // Lab3
 
 void
 tvinit(void)
@@ -77,6 +77,20 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
+
+  // Lab3
+
+  case T_PGFLT:
+	StackEnd = PGROUNDUP(STACKTOP - myproc()->mypages * PGSIZE);
+	if(rcr2() < StackEnd){
+		if(allocuvm(myproc()->pgdir, StackEnd-PGSIZE, StackEnd)==0){
+			cprintf("case T_PGFLT from trap.c: allocuvm failed. Number of current allocated pages: %d\n", myproc()->mypages);	
+			exit();
+		}
+		myproc()->mypages += 1;
+		cprintf("case T_PGFLT from trap.c: allocuvm succeeded. Number of pages allocated: %d\n", myproc()->mypages);
+	}
+	break;
 
   //PAGEBREAK: 13
   default:

@@ -71,6 +71,8 @@ exec(char *path, char **argv)
   if((sp = allocuvm(pgdir, STACKTOP - PGSIZE, STACKTOP)) == 0)   // Lab3
     goto bad;													 // Lab3
   curproc->mypages = 1;											 // Lab3
+  cprintf("Initial number of pages by the process:%d\n",myproc()->mypages);
+
 
 
   // Push argument strings, prepare rest of stack in ustack.
